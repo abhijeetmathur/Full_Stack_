@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Generation with ChatGPT</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        #prompt-input {
+            width: 100%;
+            height: 50px;
+            margin-bottom: 10px;
+        }
+        #generate-btn {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #image-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Generate an Image from Prompt</h1>
+    <input type="text" id="prompt-input" placeholder="Enter a prompt for the image" />
+    <button id="generate-btn">Generate Image</button>
+
+    <div id="image-container"></div>
+
+    <script>
+        const apiKey = 'YOUR_API_KEY'; // Replace with your OpenAI API key
+        const generateButton = document.getElementById('generate-btn');
+        const promptInput = document.getElementById('prompt-input');
+        const imageContainer = document.getElementById('image-container');
+
+        generateButton.addEventListener('click', async () => {
+            const promptText = promptInput.value;
+            imageContainer.innerHTML = 'Generating image...';
+
+            if (promptText.trim() === '') {
+                imageContainer.innerHTML = 'Please enter a valid prompt.';
+                return;
+            }
+
+            try {
+                const response = await fetch('https://api.openai.com/v1/images/generations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        prompt: promptText,
+                        n: 1, // Number of images to generate
+                        size: '1024x1024' // Size of the generated image
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const imageUrl = data.data[0].url;
+                    imageContainer.innerHTML = `<img src="${imageUrl}" alt="Generated Image" />`;
+                } else {
+                    imageContainer.innerHTML = `Error: ${data.error.message}`;
+                }
+            } catch (error) {
+                imageContainer.innerHTML = `Error: ${error.message}`;
+            }
+        });
+    </script>
+
+</body>
+</html>
