@@ -1,0 +1,59 @@
+function onOpen() {
+    const ui = SpreadsheetApp.getUi();
+    ui.createMenu('Task Management')
+        .addItem('Add Task', 'addTask')
+        .addItem('Mark Task Complete', 'markTaskComplete')
+        .addItem('Show Pending Tasks', 'showPendingTasks')
+        .addToUi();
+}
+
+function addTask() {
+    const ui = SpreadsheetApp.getUi();
+    const response = ui.prompt('Enter Task:', ui.ButtonSet.OK_CANCEL);
+    
+    if (response.getSelectedButton() === ui.Button.OK) {
+        const task = response.getResponseText();
+        const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+        sheet.appendRow([task, 'Pending']);
+        ui.alert('Task added: ' + task);
+    }
+}
+
+function markTaskComplete() {
+    const ui = SpreadsheetApp.getUi();
+    const response = ui.prompt('Enter Task to Mark as Complete:', ui.ButtonSet.OK_CANCEL);
+    
+    if (response.getSelectedButton() === ui.Button.OK) {
+        const task = response.getResponseText();
+        const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+        const data = sheet.getDataRange().getValues();
+        
+        for (let i = 1; i < data.length; i++) {
+            if (data[i][0] === task) {
+                sheet.getRange(i + 1, 2).setValue('Completed');
+                ui.alert('Task marked as completed: ' + task);
+                return;
+            }
+        }
+        
+        ui.alert('Task not found: ' + task);
+    }
+}
+
+function showPendingTasks() {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const data = sheet.getDataRange().getValues();
+    let pendingTasks = 'Pending Tasks:\n';
+
+    for (let i = 1; i < data.length; i++) {
+        if (data[i][1] === 'Pending') {
+            pendingTasks += '- ' + data[i][0] + '\n';
+        }
+    }
+    
+    if (pendingTasks === 'Pending Tasks:\n') {
+        pendingTasks = 'No pending tasks found.';
+    }
+
+    SpreadsheetApp.getUi().alert(pendingTasks);
+}
